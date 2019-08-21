@@ -5,6 +5,8 @@ import (
 	"github.com/spf13/cobra"
 	"os"
 	"os/signal"
+	"syscall"
+	"time"
 )
 
 var(
@@ -13,14 +15,28 @@ var(
 		Use:   "sig",
 		Short: "sig test",
 		Run: func(cmd *cobra.Command, args []string) {
-			c := make(chan os.Signal) //监听所有信号
-			signal.Notify(c)          //阻塞直到有信号传入
-			fmt.Println("启动")
-			s := <-c
-			fmt.Println("退出信号", s)
+			go signalListen()
+			// main loop
+			for {
+				time.Sleep(30 * time.Second)
+				fmt.Println("main loop.")
+			}
 		},
 	}
 )
 func init() {
 	rootCmd.AddCommand(sigCmd)
+}
+
+func signalListen() {
+	// init os.signal channel
+	c := make(chan os.Signal)
+	// define catch signal
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM,syscall.SIGTERM)
+	for {
+		// wait channel
+		sig := <-c
+		// when receive signal,then notify channel,and print the follow info.
+		fmt.Println("receive signal:", sig)
+	}
 }
