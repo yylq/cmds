@@ -1,22 +1,42 @@
 package main
-import(
+
+import (
 	"fmt"
-	"github.com/cihub/seelog"
+	log "github.com/cihub/seelog"
 	"github.com/spf13/cobra"
 )
-var(
-	msg string
+
+var (
+	msg       string
 	seelogCmd = &cobra.Command{
 		Use:   "seelog",
 		Short: "seelog msg",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+				logger, err := log.LoggerFromConfigAsFile("conf/seelog.xml")
+				if err != nil {
+					return err
+				}
+				log.ReplaceLogger(logger)
+				return nil
+		},
+	}
+	logmsgCmd = &cobra.Command{
+		Use:   "logmsg",
+		Short: "set seelog log level",
 		Run: func(cmd *cobra.Command, args []string) {
-			seelog.
-			seelog.Error("msg:%v", msg)
+			fmt.Printf("msg:%s\n",msg)
+			log.Trace( msg)
+			log.Debug( msg)
+			log.Info( msg)
+			log.Warn( msg)
+			log.Error( msg)
+			log.Critical( msg)
 		},
 	}
 )
+
 func init() {
-	fmt.Printf("seelog init")
 	rootCmd.AddCommand(seelogCmd)
-	seelogCmd.PersistentFlags().StringVarP(&msg, "msg", "m","", "log message")
+	seelogCmd.AddCommand(logmsgCmd)
+	logmsgCmd.PersistentFlags().StringVarP(&msg, "msg", "m", "", "log message")
 }

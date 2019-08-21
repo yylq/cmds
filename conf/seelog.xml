@@ -1,0 +1,13 @@
+<seelog minlevel="info">
+    <outputs formatid="main">
+        <console/>
+        <splitter formatid="format1">
+            <file path="test.log"/>
+        </splitter>
+    </outputs>
+
+    <formats>
+        <format id="main" format="%Time|%LEV|%File|%Line|%Msg%n"/>
+        <format id="format1" format="%Time|%LEV|%Msg%n"/>
+    </formats>
+</seelog>
