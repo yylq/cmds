@@ -66,15 +66,7 @@ var (
 			log.Println("sssssssss",10)
 		},
 	}
-	chanCmd = &cobra.Command{
-		Use:   "log",
-		Short: "set seelog log level",
-		Run: func(cmd *cobra.Command, args []string) {
-			log.SetFlags(log.Ldate)
 
-			log.Println("sssssssss",10)
-		},
-	}
 )
 
 func init() {
