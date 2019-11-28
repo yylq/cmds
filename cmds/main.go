@@ -11,9 +11,7 @@ var(
 		Use:   "cmds",
 		Short: "cmds test",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) > 0 {
-				return fmt.Errorf("'%s' is an invalid argument", args[0])
-			}
+			fmt.Println(args)
 			return nil
 		},
 	}

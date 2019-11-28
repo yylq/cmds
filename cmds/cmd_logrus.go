@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/lestrrat-go/file-rotatelogs"
 	"github.com/rifflock/lfshook"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"time"
 )
@@ -24,8 +24,8 @@ func (c *CheckerResult) String() string {
 	bytes, _ := json.Marshal(c)
 	return string(bytes)
 }
-func (c *CheckerResult) ToField() log.Fields {
-		return log.Fields{ "TimeStamp": c.TimeStamp,
+func (c *CheckerResult) ToField() logrus.Fields {
+		return logrus.Fields{ "TimeStamp": c.TimeStamp,
 		"SrcAppName":c.SrcAppName, "DestAppName":c.DestAppName,
 		"RemoteIp":c.RemoteIp, "XForwardedFor":c.XForwardedFor,
 		"AuthToken":c.AuthToken, "AuthtokenCheckOpen":c.AuthtokenCheckOpen, "Result":c.Result}
@@ -36,35 +36,33 @@ var (
 	logrusCmd = &cobra.Command{
 		Use:   "logrus",
 		Short: "logrus test",
+	}
+	logrusDefaultCmd = &cobra.Command{
+		Use:   "default",
+		Short: "default test",
 		Run: func(cmd *cobra.Command, args []string) {
-            /*
-			formatter := &log.JSONFormatter{DisableTimestamp: true,
-				FieldMap: log.FieldMap{
-					log.FieldKeyLevel: "lev",
-					log.FieldKeyMsg:   "check_result",
-				},
-			}*/
-			/*
-			formatter := &log.TextFormatter{DisableTimestamp:true,
-				     FieldMap: log.FieldMap{
-					     log.FieldKeyLevel: "lev",
-				         log.FieldKeyMsg:   "msg"},
-			}
-			logger := &log.Logger{
-				Out:          os.Stdout,
-				Formatter:    formatter,
-				Hooks:        make(log.LevelHooks),
-				Level:        log.InfoLevel,
-				ExitFunc:     os.Exit,
-				ReportCaller: false,
-			}
-			logger.SetLevel(log.InfoLevel)
-			*/
+			logrus.Trace("this a Trace msg")
+			logrus.Debug("this a debug msg")
+			logrus.Info("this a info msg")
+			logrus.Error("this a Error msg")
+			logrus.Warn("this a Warn msg")
+			logrus.Fatal("this a Fatal msg")
+		},
+	}
+	logrusFormatCmd = &cobra.Command{
+		Use:   "format",
+		Short: "format test",
+		Run: func(cmd *cobra.Command, args []string) {
 
-
-			InitLog()
-			ch := &CheckerResult{TimeStamp: time.Now().UTC().Format("2006-01-02T15:04:05")}
-			log.WithFields(ch.ToField()).Infoln()
+		},
+	}
+	logrusFileCmd = &cobra.Command{
+		Use:   "file",
+		Short: "file test",
+		Run: func(cmd *cobra.Command, args []string) {
+			//InitLog()
+			//ch := &CheckerResult{TimeStamp: time.Now().UTC().Format("2006-01-02T15:04:05")}
+			//log.WithFields(ch.ToField()).Infoln()
 			//logger.WithFields(ch.ToField()).Infoln("")
 			//entry := logger.WithFields(log.Fields{"request_id": "aaaa", "user_ip": "192.168.11.1"})
 
@@ -80,20 +78,20 @@ var (
 			*/
 			//entry.Infoln(ch)
 			//logger.Info(ch)
-
 		},
 	}
 )
 
 func init() {
 	rootCmd.AddCommand(logrusCmd)
+	logrusCmd.AddCommand(logrusDefaultCmd,logrusFormatCmd,logrusFileCmd)
 }
 func InitLog() {
-	log.SetLevel(log.InfoLevel)
+	logrus.SetLevel(logrus.InfoLevel)
 	hook := newLfsHook("checkresult")
-	log.AddHook(hook)
+	logrus.AddHook(hook)
 }
-func newLfsHook(logName string) log.Hook {
+func newLfsHook(logName string) logrus.Hook {
 
 	writer, err := rotatelogs.New(
 		logName+"%Y-%m-%d",
@@ -103,7 +101,7 @@ func newLfsHook(logName string) log.Hook {
 	)
 
 	if err != nil {
-		log.Errorf("config local file system for logger error: %v", err)
+		logrus.Errorf("config local file system for logger error: %v", err)
 	}
     /*
 	formatter := &log.JSONFormatter{DisableTimestamp: true,
@@ -114,7 +112,7 @@ func newLfsHook(logName string) log.Hook {
 	}*/
 
 	lfsHook := lfshook.NewHook(lfshook.WriterMap{
-		log.InfoLevel:  writer,
+		logrus.InfoLevel:  writer,
 	}, new(JdmeshFormatter))
 
 	return lfsHook
