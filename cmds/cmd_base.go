@@ -43,7 +43,7 @@ var (
 
 func init() {
 	rootCmd.AddCommand(baseCmd)
-	baseCmd.AddCommand(chanCmd,contextCmd, reflectCmd)
+	baseCmd.AddCommand(chanCmd, contextCmd, reflectCmd)
 }
 func waitForCompletion(ctx context.Context, fn func(context.Context)) {
 	wg.Add(1)
@@ -55,24 +55,24 @@ func runcontextCmd() {
 	go waitForCompletion(ctx, TestPanicContext)
 	for {
 		select {
-		case <-time.After(10*time.Second):
+		case <-time.After(10 * time.Second):
 
-			fmt.Printf("10s timer\n",)
+			fmt.Printf("10s timer\n")
 		}
 	}
 
 }
 func TestPanicContext(ctx context.Context) {
-	str:=[]string{"111","2222","333","4444","5555"}
-	i :=0;
+	str := []string{"111", "2222", "333", "4444", "5555"}
+	i := 0
 	for {
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(5*time.Second):
+		case <-time.After(5 * time.Second):
 			s := str[i]
-			fmt.Printf("%s\n",s)
-			i+=1
+			fmt.Printf("%s\n", s)
+			i += 1
 		}
 	}
 }
@@ -96,7 +96,7 @@ func (r *checkerResult) String() string {
 }
 
 func runreflectCmd() {
-	cr:=&CheckerResult{TimeStamp:"1111"}
+	cr := &CheckerResult{TimeStamp: "1111"}
 	getType := reflect.TypeOf(cr)
 	fmt.Println("get Type is :", getType.Name())
 
@@ -108,5 +108,3 @@ func runreflectCmd() {
 		fmt.Println("Fields is:", field)
 	}
 }
-
-
