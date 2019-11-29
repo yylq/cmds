@@ -96,7 +96,7 @@ func (r *checkerResult) String() string {
 }
 
 func runreflectCmd() {
-	cr := &CheckerResult{TimeStamp: "1111"}
+	cr := &checkerResult{TimeStamp: "1111"}
 	getType := reflect.TypeOf(cr)
 	fmt.Println("get Type is :", getType.Name())
 
