@@ -28,10 +28,22 @@ var (
 	contextCmd = &cobra.Command{
 		Use:   "context",
 		Short: "context test",
+	}
+	contextPanicCmd = &cobra.Command{
+		Use:   "panic",
+		Short: "context panic",
 		Run: func(cmd *cobra.Command, args []string) {
-			runcontextCmd()
+			runcontextPanicCmd()
 		},
 	}
+	contextValueCmd = &cobra.Command{
+		Use:   "value",
+		Short: "context test",
+		Run: func(cmd *cobra.Command, args []string) {
+			runcontextValueCmd()
+		},
+	}
+
 	reflectCmd = &cobra.Command{
 		Use:   "reflect",
 		Short: "reflect test",
@@ -44,13 +56,15 @@ var (
 func init() {
 	rootCmd.AddCommand(baseCmd)
 	baseCmd.AddCommand(chanCmd, contextCmd, reflectCmd)
+	contextCmd.AddCommand(contextPanicCmd, contextValueCmd)
 }
 func waitForCompletion(ctx context.Context, fn func(context.Context)) {
 	wg.Add(1)
 	fn(ctx)
 	wg.Done()
 }
-func runcontextCmd() {
+
+func runcontextPanicCmd() {
 	ctx, _ := context.WithCancel(context.Background())
 	go waitForCompletion(ctx, TestPanicContext)
 	for {
@@ -76,7 +90,36 @@ func TestPanicContext(ctx context.Context) {
 		}
 	}
 }
+type Key struct {}
 
+func runcontextValueCmd() {
+	ctx:=context.Background()
+	nskey := Key{}
+	go func() {
+		var i int32;
+		for i = 0;i<10;{
+			select {
+			case <-time.After(5* time.Second):
+				i += 1
+				context.WithValue(ctx,nskey, i)
+				fmt.Printf("product   i:=%d\n",i)
+			}
+		}
+	}()
+	for {
+		select {
+		case <-time.After(10* time.Second):
+			v := ctx.Value(nskey)
+			if v == nil {
+				fmt.Printf("consumer empty\n")
+				continue
+			}
+			i := v.(int32)
+			fmt.Printf("consumer i=%d \n",i)
+		}
+	}
+
+}
 type checkerResult struct {
 	TimeStamp          string
 	SrcAppName         string
