@@ -13,7 +13,7 @@ var(
 		Use:   "cmds",
 		Short: "cmds test",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Println(args)
+			fmt.Printf("root args:%v\n",args)
 			return nil
 		},
 	}

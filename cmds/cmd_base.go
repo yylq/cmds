@@ -90,34 +90,48 @@ func TestPanicContext(ctx context.Context) {
 		}
 	}
 }
-type Key struct {}
+type Key struct {
+	Name string
+}
+type Value struct {
+	Name string
+}
+var(
+	key = Key{}
+	key1 = Key{Name:"jdcloud"}
+)
+
+
+func injectkey(ctx context.Context) context.Context{
+	return context.WithValue(ctx,key, &Value{"key is empty"})
+}
+
+func injeckey1tcontext(ctx context.Context) context.Context {
+	return context.WithValue(ctx,key1, &Value{"key is jdcloud"})
+}
 
 func runcontextValueCmd() {
-	ctx:=context.Background()
-	nskey := Key{}
-	go func() {
-		var i int32;
-		for i = 0;i<10;{
-			select {
-			case <-time.After(5* time.Second):
-				i += 1
-				context.WithValue(ctx,nskey, i)
-				fmt.Printf("product   i:=%d\n",i)
-			}
+	type favContextKey string
+
+	f := func(ctx context.Context, k Key) {
+		if v,ok := ctx.Value(k).(*Value); ok {
+			fmt.Printf("found value:%v\n", v)
+			return
 		}
-	}()
-	for {
-		select {
-		case <-time.After(10* time.Second):
-			v := ctx.Value(nskey)
-			if v == nil {
-				fmt.Printf("consumer empty\n")
-				continue
-			}
-			i := v.(int32)
-			fmt.Printf("consumer i=%d \n",i)
-		}
+		fmt.Printf("key not found:%v\n", k)
 	}
+	ctx := context.Background()
+	ctx1 := injectkey(ctx)
+	ctx2 := injeckey1tcontext(ctx1)
+	fmt.Printf("found in ctx :%v\n", ctx)
+	f(ctx, key)
+	f(ctx, key1)
+	fmt.Printf("found in ctx1 :%v\n", ctx1)
+	f(ctx1, key)
+	f(ctx1, key1)
+	fmt.Printf("found in ctx2 :%v\n", ctx2)
+	f(ctx2, key)
+	f(ctx2, key1)
 
 }
 type checkerResult struct {
@@ -140,14 +154,19 @@ func (r *checkerResult) String() string {
 
 func runreflectCmd() {
 	cr := &checkerResult{TimeStamp: "1111"}
+	cr2 := &checkerResult{TimeStamp: "2222"}
+	cr3 := &checkerResult{TimeStamp: "1111"}
 	getType := reflect.TypeOf(cr)
 	fmt.Println("get Type is :", getType.Name())
 
 	getValue := reflect.ValueOf(cr)
 	fmt.Println("get all Fields is:", getValue)
 
-	for i := 0; i < getType.NumField(); i++ {
+/*	for i := 0; i < getType.NumField(); i++ {
 		field := getType.Field(i)
 		fmt.Println("Fields is:", field)
 	}
+*/
+	fmt.Println("DeepEqual:",reflect.DeepEqual(cr,cr3))
+	fmt.Println("DeepEqual:",reflect.DeepEqual(cr,cr2))
 }
