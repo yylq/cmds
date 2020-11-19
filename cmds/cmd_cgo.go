@@ -19,8 +19,8 @@ var(
 		Short: "cgo",
 	}
 	cgoHelloCmd = &cobra.Command{
-		Use:   "hello",
-		Short: "hello",
+		Use:   "string",
+		Short: "string",
 		Run: func(cmd *cobra.Command, args []string) {
 			str:= C.CString("hello")
 			C.myhello(str)
